@@ -244,8 +244,8 @@ if (confirm('Yakin ingin menghapus transaksi ini?')) {
   <p><strong>Nama Pengguna:</strong> {user?.user_metadata?.name || user?.email}</p>
 </div>
 <div className="mt-4 flex flex-col items-center justify-center text-sm text-gray-700">
-  <p>Laporan Transaksi</p>
-  <p className="mt-1">Pengguna</p>
+  <p>Laporan Transaksi Pengguna</p>
+  <p className="mt-1"></p>
 </div>
           <table className="w-full text-sm border border-collapse">
 
