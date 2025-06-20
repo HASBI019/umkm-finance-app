@@ -22,6 +22,10 @@ export default function Dashboard() {
   const [saldo, setSaldo] = useState(0)
   const [filterTanggal, setFilterTanggal] = useState(null)
 
+  const [editId, setEditId] = useState(null)
+  const [editJumlah, setEditJumlah] = useState('')
+  const [editCatatan, setEditCatatan] = useState('')
+
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -33,7 +37,7 @@ export default function Dashboard() {
       }
     }
     getSession()
-  }, [])
+  }, [filterTanggal])
 
   const fetchData = async (userId) => {
     const { data, error } = await supabase
@@ -88,8 +92,35 @@ export default function Dashboard() {
     }
   }
 
+  const handleDelete = async (id) => {
+  // eslint-disable-next-line no-restricted-globals
+if (confirm('Yakin ingin menghapus transaksi ini?')) {
+
+      await supabase.from('transactions').delete().eq('id', id)
+      fetchData(user.id)
+    }
+  }
+
+  const handleEdit = (item) => {
+    setEditId(item.id)
+    setEditJumlah(item.jumlah)
+    setEditCatatan(item.catatan)
+  }
+
+  const handleUpdate = async () => {
+    if (!editId) return
+    await supabase.from('transactions')
+      .update({ jumlah: parseFloat(editJumlah), catatan: editCatatan })
+      .eq('id', editId)
+
+    setEditId(null)
+    setEditJumlah('')
+    setEditCatatan('')
+    fetchData(user.id)
+  }
+
   const downloadPDF = async () => {
-    const input = document.getElementById('tabel-transaksi')
+    const input = document.getElementById('laporan-pdf')
     const canvas = await html2canvas(input)
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF('p', 'mm', 'a4')
@@ -115,7 +146,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+   <div
+  className="min-h-screen bg-cover bg-center p-6"
+  style={{ backgroundImage: "url('/bg-umkm.jpg')" }}
+>
+
       <div className="flex justify-end mb-4">
         <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-1 rounded text-sm">
           Logout
@@ -123,6 +158,15 @@ export default function Dashboard() {
       </div>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }} className="max-w-4xl mx-auto bg-white shadow p-6 rounded-lg">
+        <div className="text-center mb-4">
+          <img
+            src={user?.user_metadata?.avatar_url || '/default-profile.png'}
+            alt="Profil"
+            className="w-16 h-16 rounded-full mx-auto border"
+          />
+          <p className="text-sm text-gray-700 mt-1">{user?.user_metadata?.name || user?.email}</p>
+        </div>
+
         <img src="/logo-umkm.png" alt="Logo UMKM" className="h-120 w-auto mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-purple-600 mb-2 text-center">📊 Dashboard Keuangan UMKM</h1>
 
@@ -195,15 +239,25 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div id="tabel-transaksi" className="overflow-x-auto">
+        <div id="laporan-pdf" className="overflow-x-auto">
+            <div className="mb-4 text-left text-sm text-gray-700">
+  <p><strong>Nama Pengguna:</strong> {user?.user_metadata?.name || user?.email}</p>
+</div>
+<div className="mt-4 flex flex-col items-center justify-center text-sm text-gray-700">
+  <p>Laporan Transaksi</p>
+  <p className="mt-1">Pengguna</p>
+</div>
           <table className="w-full text-sm border border-collapse">
+
             <thead className="bg-gray-200">
+                
               <tr>
                 <th className="p-2 border">Tanggal</th>
                 <th className="p-2 border">Tipe</th>
                 <th className="p-2 border">Catatan</th>
                 <th className="p-2 border">Jumlah</th>
                 <th className="p-2 border">Saldo</th>
+                <th className="p-2 border">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -214,11 +268,45 @@ export default function Dashboard() {
                   <td className="p-2 border">{item.catatan || '-'}</td>
                   <td className="p-2 border">Rp {Number(item.jumlah).toLocaleString()}</td>
                   <td className="p-2 border">Rp {getSaldoSementara(index).toLocaleString()}</td>
+                  <td className="p-2 border flex gap-2">
+                    <button onClick={() => handleEdit(item)} className="text-blue-600 text-xs">✏️ Edit</button>
+                    <button onClick={() => handleDelete(item.id)} className="text-red-600 text-xs">🗑️ Hapus</button>
+                  </td>
                 </tr>
+                
               ))}
             </tbody>
+          
+
           </table>
         </div>
+
+
+        {editId && (
+          <div className="bg-yellow-50 p-4 mt-4 rounded shadow border">
+            <h3 className="font-semibold text-yellow-700 mb-2">Edit Transaksi</h3>
+            <div className="flex flex-col sm:flex-row gap-2 mb-2">
+              <input
+                type="number"
+                value={editJumlah}
+                onChange={(e) => setEditJumlah(e.target.value)}
+                className="border px-2 py-1 rounded w-full"
+                placeholder="Jumlah"
+              />
+              <input
+                type="text"
+                value={editCatatan}
+                onChange={(e) => setEditCatatan(e.target.value)}
+                className="border px-2 py-1 rounded w-full"
+                placeholder="Catatan"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleUpdate} className="bg-green-600 text-white px-4 py-1 rounded">✅ Simpan</button>
+              <button onClick={() => setEditId(null)} className="bg-gray-400 text-white px-4 py-1 rounded">❌ Batal</button>
+            </div>
+          </div>
+        )}
 
         <div className="text-center mt-8">
           <motion.p initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ duration: 0.5 }} className="text-lg font-semibold text-purple-700">✨ Buat UMKM, Semangat Terus! ✨</motion.p>
