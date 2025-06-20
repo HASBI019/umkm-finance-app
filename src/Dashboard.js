@@ -123,7 +123,7 @@ export default function Dashboard() {
       </div>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }} className="max-w-4xl mx-auto bg-white shadow p-6 rounded-lg">
-        <img src="/logo-umkm.png" alt="Logo UMKM" className="h-100 w-auto mx-auto mb-4" />
+        <img src="/logo-umkm.png" alt="Logo UMKM" className="h-120 w-auto mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-purple-600 mb-2 text-center">📊 Dashboard Keuangan UMKM</h1>
 
         <div className="mb-4">
@@ -221,21 +221,21 @@ export default function Dashboard() {
         </div>
 
         <div className="text-center mt-8">
-          <motion.p initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ duration: 0.5 }} className="text-lg font-semibold text-purple-700">✨ Buat UMKM, Biar Semangat Terus! ✨</motion.p>
-          <p className="text-sm text-gray-600 mt-1">Kami Mahasiswa STTC - Prodi Informatika | Kelompok 2</p>
+          <motion.p initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ duration: 0.5 }} className="text-lg font-semibold text-purple-700">✨ Buat UMKM, Semangat Terus! ✨</motion.p>
+          <p className="text-sm text-gray-600 mt-1">Kami Mahasiswa STTC - Prodi Informatika | Sistem Informasi | Kelompok 2</p>
           <p className="text-sm text-gray-700 font-semibold mt-1">Team: Three Start ⭐⭐⭐</p>
           <div className="flex justify-center gap-4 mt-4">
             <div className="text-center">
               <img src="/team1.jpg" alt="Tim 1" className="w-20 h-20 rounded-full object-cover border" />
-              <p className="text-xs mt-1">Hasbi</p>
+              <p className="text-xs mt-1">Deden</p>
             </div>
             <div className="text-center">
               <img src="/team2.jpg" alt="Tim 2" className="w-20 h-20 rounded-full object-cover border" />
-              <p className="text-xs mt-1">Anggota 2</p>
+              <p className="text-xs mt-1">Hasbi</p>
             </div>
             <div className="text-center">
               <img src="/team3.jpg" alt="Tim 3" className="w-20 h-20 rounded-full object-cover border" />
-              <p className="text-xs mt-1">Anggota 3</p>
+              <p className="text-xs mt-1">Wajdi</p>
             </div>
           </div>
         </div>

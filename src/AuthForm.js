@@ -57,9 +57,22 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 via-blue-100 to-pink-100 p-4">
+   <div
+  className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat p-4"
+  style={{ backgroundImage: "url('/bg-login.jpg')" }}
+>
+
+
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-80 animate-fade-in">
         <h1 className="text-center text-2xl font-bold text-purple-600 mb-2">👋 Welcome to Keuangan UMKM</h1>
+        <div className="flex justify-center mb-4">
+  <img
+    src="/logo-team.png"
+    alt="Logo UMKM"
+    className="w-24 h-24 rounded-full object-cover shadow"
+  />
+</div>
+
         <h2 className="text-xl font-bold text-center text-purple-600 mb-4">
           {isLogin ? 'Login' : 'Daftar Akun'}
         </h2>
