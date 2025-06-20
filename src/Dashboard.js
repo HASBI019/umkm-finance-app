@@ -20,7 +20,8 @@ export default function Dashboard() {
     { name: 'Pengeluaran', value: 0 }
   ])
   const [saldo, setSaldo] = useState(0)
-  const [filterTanggal, setFilterTanggal] = useState(null)
+  const [tanggalDari, setTanggalDari] = useState(null)
+  const [tanggalKe, setTanggalKe] = useState(null)
 
   const [editId, setEditId] = useState(null)
   const [editJumlah, setEditJumlah] = useState('')
@@ -37,7 +38,7 @@ export default function Dashboard() {
       }
     }
     getSession()
-  }, [filterTanggal])
+  }, [tanggalDari, tanggalKe])
 
   const fetchData = async (userId) => {
     const { data, error } = await supabase
@@ -47,9 +48,13 @@ export default function Dashboard() {
       .order('tanggal', { ascending: true })
 
     if (!error) {
-      const filtered = filterTanggal
-        ? data.filter((d) => d.tanggal === format(filterTanggal, 'yyyy-MM-dd'))
-        : data
+      const filtered = data.filter((d) => {
+        const tgl = new Date(d.tanggal)
+        if (tanggalDari && tgl < tanggalDari) return false
+        if (tanggalKe && tgl > tanggalKe) return false
+        return true
+      })
+
       setData(filtered)
 
       const pemasukan = filtered
@@ -93,9 +98,8 @@ export default function Dashboard() {
   }
 
   const handleDelete = async (id) => {
-  // eslint-disable-next-line no-restricted-globals
-if (confirm('Yakin ingin menghapus transaksi ini?')) {
-
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm('Yakin ingin menghapus transaksi ini?')) {
       await supabase.from('transactions').delete().eq('id', id)
       fetchData(user.id)
     }
@@ -146,7 +150,7 @@ if (confirm('Yakin ingin menghapus transaksi ini?')) {
   }
 
   return (
-   <div
+    <div
   className="min-h-screen bg-cover bg-center p-6"
   style={{ backgroundImage: "url('/bg-umkm.jpg')" }}
 >
@@ -170,14 +174,27 @@ if (confirm('Yakin ingin menghapus transaksi ini?')) {
         <img src="/logo-umkm.png" alt="Logo UMKM" className="h-120 w-auto mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-purple-600 mb-2 text-center">📊 Dashboard Keuangan UMKM</h1>
 
-        <div className="mb-4">
-          <DatePicker
-            selected={filterTanggal}
-            onChange={(date) => setFilterTanggal(date)}
-            dateFormat="yyyy-MM-dd"
-            className="border px-3 py-2 rounded"
-            placeholderText="Filter berdasarkan tanggal"
-          />
+        <div className="flex flex-wrap gap-4 mb-4">
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">📅 Dari Tanggal</label>
+            <DatePicker
+              selected={tanggalDari}
+              onChange={(date) => setTanggalDari(date)}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Mulai"
+              className="border px-3 py-2 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">📅 Sampai Tanggal</label>
+            <DatePicker
+              selected={tanggalKe}
+              onChange={(date) => setTanggalKe(date)}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Sampai"
+              className="border px-3 py-2 rounded"
+            />
+          </div>
         </div>
 
         <div className="mb-6">
@@ -227,60 +244,60 @@ if (confirm('Yakin ingin menghapus transaksi ini?')) {
           </div>
         </form>
 
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-lg font-semibold">Riwayat Transaksi</h2>
-          <div className="flex items-center gap-3">
-            <div className={`px-3 py-1 rounded text-sm font-medium ${saldo >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              💼 Sisa Saldo: Rp {saldo.toLocaleString()}
-            </div>
-            <button onClick={downloadPDF} className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
-              📥 Download PDF
-            </button>
+        {/* Bagian PDF */}
+        <div id="laporan-pdf">
+          <div className="mb-4 text-left text-sm text-gray-700">
+            <p><strong>Nama Pengguna:</strong> {user?.user_metadata?.name || user?.email}</p>
           </div>
-        </div>
 
-        <div id="laporan-pdf" className="overflow-x-auto">
-            <div className="mb-4 text-left text-sm text-gray-700">
-  <p><strong>Nama Pengguna:</strong> {user?.user_metadata?.name || user?.email}</p>
-</div>
-<div className="mt-4 flex flex-col items-center justify-center text-sm text-gray-700">
-  <p>Laporan Transaksi Pengguna</p>
-  <p className="mt-1"></p>
-</div>
-          <table className="w-full text-sm border border-collapse">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-semibold">Riwayat Transaksi</h2>
+            <div className="flex items-center gap-3">
+              <div className={`px-3 py-1 rounded text-sm font-medium ${saldo >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                💼 Sisa Saldo: Rp {saldo.toLocaleString()}
+              </div>
+              <button onClick={downloadPDF} className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                📥 Download PDF
+              </button>
+            </div>
+          </div>
 
-            <thead className="bg-gray-200">
-                
-              <tr>
-                <th className="p-2 border">Tanggal</th>
-                <th className="p-2 border">Tipe</th>
-                <th className="p-2 border">Catatan</th>
-                <th className="p-2 border">Jumlah</th>
-                <th className="p-2 border">Saldo</th>
-                <th className="p-2 border">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((item, index) => (
-                <tr key={item.id}>
-                  <td className="p-2 border">{item.tanggal}</td>
-                  <td className="p-2 border capitalize">{item.tipe}</td>
-                  <td className="p-2 border">{item.catatan || '-'}</td>
-                  <td className="p-2 border">Rp {Number(item.jumlah).toLocaleString()}</td>
-                  <td className="p-2 border">Rp {getSaldoSementara(index).toLocaleString()}</td>
-                  <td className="p-2 border flex gap-2">
-                    <button onClick={() => handleEdit(item)} className="text-blue-600 text-xs">✏️ Edit</button>
-                    <button onClick={() => handleDelete(item.id)} className="text-red-600 text-xs">🗑️ Hapus</button>
-                  </td>
+          <div className="overflow-x-auto">
+            <div className="mt-4 flex flex-col items-center justify-center text-sm text-gray-700">
+            <p>Laporan Transaksi Pengguna</p>
+            <p className="mt-1"></p>
+          </div>
+            <table className="w-full text-sm border border-collapse">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="p-2 border">Tanggal</th>
+                  <th className="p-2 border">Tipe</th>
+                  <th className="p-2 border">Catatan</th>
+                  <th className="p-2 border">Jumlah</th>
+                  <th className="p-2 border">Saldo</th>
+                  <th className="p-2 border">Aksi</th>
                 </tr>
-                
-              ))}
-            </tbody>
+              </thead>
+              <tbody>
+                {data.map((item, index) => (
+                  <tr key={item.id}>
+                    <td className="p-2 border">{item.tanggal}</td>
+                    <td className="p-2 border capitalize">{item.tipe}</td>
+                    <td className="p-2 border">{item.catatan || '-'}</td>
+                    <td className="p-2 border">Rp {Number(item.jumlah).toLocaleString()}</td>
+                    <td className="p-2 border">Rp {getSaldoSementara(index).toLocaleString()}</td>
+                    <td className="p-2 border flex gap-2">
+                      <button onClick={() => handleEdit(item)} className="text-blue-600 text-xs">✏️ Edit</button>
+                      <button onClick={() => handleDelete(item.id)} className="text-red-600 text-xs">🗑️ Hapus</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
           
-
-          </table>
         </div>
-
 
         {editId && (
           <div className="bg-yellow-50 p-4 mt-4 rounded shadow border">
@@ -310,8 +327,8 @@ if (confirm('Yakin ingin menghapus transaksi ini?')) {
 
         <div className="text-center mt-8">
           <motion.p initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ duration: 0.5 }} className="text-lg font-semibold text-purple-700">✨ Buat UMKM, Semangat Terus! ✨</motion.p>
-          <p className="text-sm text-gray-600 mt-1">Kami Mahasiswa STTC - Prodi Informatika | Sistem Informasi | Kelompok 2</p>
-          <p className="text-sm text-gray-700 font-semibold mt-1">Team: Three Start ⭐⭐⭐</p>
+          <p className="text-sm text-gray-600 mt-1">Kami Mahasiswa STTC - Prodi Informatika | MK Sistem Informasi | Kelompok 2 Siap Membantu UMKM</p>
+          <p className="text-sm text-gray-700 font-semibold mt-1">MY TEAM : THREE START⭐⭐⭐</p>
           <div className="flex justify-center gap-4 mt-4">
             <div className="text-center">
               <img src="/team1.jpg" alt="Tim 1" className="w-20 h-20 rounded-full object-cover border" />
