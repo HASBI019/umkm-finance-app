@@ -6,6 +6,7 @@ import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { format } from 'date-fns'
+import { motion } from 'framer-motion'
 
 export default function Dashboard() {
   const [user, setUser] = useState(null)
@@ -19,6 +20,7 @@ export default function Dashboard() {
     { name: 'Pengeluaran', value: 0 }
   ])
   const [saldo, setSaldo] = useState(0)
+  const [filterTanggal, setFilterTanggal] = useState(null)
 
   useEffect(() => {
     const getSession = async () => {
@@ -41,13 +43,16 @@ export default function Dashboard() {
       .order('tanggal', { ascending: true })
 
     if (!error) {
-      setData(data)
+      const filtered = filterTanggal
+        ? data.filter((d) => d.tanggal === format(filterTanggal, 'yyyy-MM-dd'))
+        : data
+      setData(filtered)
 
-      const pemasukan = data
+      const pemasukan = filtered
         .filter((item) => item.tipe === 'pemasukan')
         .reduce((acc, curr) => acc + Number(curr.jumlah), 0)
 
-      const pengeluaran = data
+      const pengeluaran = filtered
         .filter((item) => item.tipe === 'pengeluaran')
         .reduce((acc, curr) => acc + Number(curr.jumlah), 0)
 
@@ -117,10 +122,20 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <div className="max-w-4xl mx-auto bg-white shadow p-6 rounded-lg">
-        <h1 className="text-2xl font-bold text-purple-600 mb-4 text-center">📊 Dashboard Keuangan UMKM</h1>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }} className="max-w-4xl mx-auto bg-white shadow p-6 rounded-lg">
+        <img src="/logo-umkm.png" alt="Logo UMKM" className="h-20 mx-auto mb-4" />
+        <h1 className="text-2xl font-bold text-purple-600 mb-2 text-center">📊 Dashboard Keuangan UMKM</h1>
 
-        {/* Grafik */}
+        <div className="mb-4">
+          <DatePicker
+            selected={filterTanggal}
+            onChange={(date) => setFilterTanggal(date)}
+            dateFormat="yyyy-MM-dd"
+            className="border px-3 py-2 rounded"
+            placeholderText="Filter berdasarkan tanggal"
+          />
+        </div>
+
         <div className="mb-6">
           <h2 className="text-lg font-semibold mb-2">Grafik Keuangan</h2>
           <ResponsiveContainer width="100%" height={250}>
@@ -134,17 +149,14 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="grid sm:grid-cols-2 gap-4 mb-6">
-          <div>
-            <DatePicker
-              selected={tanggal}
-              onChange={(date) => setTanggal(date)}
-              dateFormat="yyyy-MM-dd"
-              className="border px-3 py-2 rounded w-full"
-              placeholderText="Pilih tanggal transaksi"
-            />
-          </div>
+          <DatePicker
+            selected={tanggal}
+            onChange={(date) => setTanggal(date)}
+            dateFormat="yyyy-MM-dd"
+            className="border px-3 py-2 rounded w-full"
+            placeholderText="Pilih tanggal transaksi"
+          />
           <select value={tipe} onChange={(e) => setTipe(e.target.value)} className="border px-3 py-2 rounded">
             <option value="pemasukan">💰 Pemasukan</option>
             <option value="pengeluaran">💸 Pengeluaran</option>
@@ -171,7 +183,6 @@ export default function Dashboard() {
           </div>
         </form>
 
-        {/* Tombol Download + Sisa Saldo */}
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-lg font-semibold">Riwayat Transaksi</h2>
           <div className="flex items-center gap-3">
@@ -184,7 +195,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Tabel */}
         <div id="tabel-transaksi" className="overflow-x-auto">
           <table className="w-full text-sm border border-collapse">
             <thead className="bg-gray-200">
@@ -209,7 +219,27 @@ export default function Dashboard() {
             </tbody>
           </table>
         </div>
-      </div>
+
+        <div className="text-center mt-8">
+          <motion.p initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ duration: 0.5 }} className="text-lg font-semibold text-purple-700">✨ Buat UMKM, Biar Semangat Terus! ✨</motion.p>
+          <p className="text-sm text-gray-600 mt-1">Kami Mahasiswa STTC - Prodi Informatika | Kelompok 2</p>
+          <p className="text-sm text-gray-700 font-semibold mt-1">Team: Three Start ⭐⭐⭐</p>
+          <div className="flex justify-center gap-4 mt-4">
+            <div className="text-center">
+              <img src="/team1.jpg" alt="Tim 1" className="w-20 h-20 rounded-full object-cover border" />
+              <p className="text-xs mt-1">Hasbi</p>
+            </div>
+            <div className="text-center">
+              <img src="/team2.jpg" alt="Tim 2" className="w-20 h-20 rounded-full object-cover border" />
+              <p className="text-xs mt-1">Anggota 2</p>
+            </div>
+            <div className="text-center">
+              <img src="/team3.jpg" alt="Tim 3" className="w-20 h-20 rounded-full object-cover border" />
+              <p className="text-xs mt-1">Anggota 3</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }
