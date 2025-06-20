@@ -8,7 +8,6 @@ export default function AuthForm() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
-  // ⏩ Cek session: kalau sudah login, langsung ke dashboard
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -40,9 +39,27 @@ export default function AuthForm() {
     }
   }
 
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' })
+    if (error) {
+      setError('❌ Gagal login dengan Google: ' + error.message)
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      setError('Masukkan email terlebih dahulu untuk reset password.')
+      return
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email)
+    if (error) setError(error.message)
+    else setMessage('📧 Link reset password telah dikirim ke email kamu.')
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-80">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 via-blue-100 to-pink-100 p-4">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-80 animate-fade-in">
+        <h1 className="text-center text-2xl font-bold text-purple-600 mb-2">👋 Welcome to Keuangan UMKM</h1>
         <h2 className="text-xl font-bold text-center text-purple-600 mb-4">
           {isLogin ? 'Login' : 'Daftar Akun'}
         </h2>
@@ -71,6 +88,24 @@ export default function AuthForm() {
           className="bg-purple-600 text-white w-full py-2 rounded hover:bg-purple-700"
         >
           {isLogin ? 'Login' : 'Daftar'}
+        </button>
+
+        {isLogin && (
+          <button
+            type="button"
+            onClick={handleResetPassword}
+            className="text-xs text-blue-600 underline mt-2"
+          >
+            Lupa kata sandi?
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="mt-4 bg-red-500 text-white py-2 w-full rounded hover:bg-red-600"
+        >
+          🔑 Login dengan Google
         </button>
 
         <p className="text-sm text-center mt-4">
