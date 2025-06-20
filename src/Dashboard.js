@@ -3,13 +3,16 @@ import { supabase } from './supabaseClient'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { format } from 'date-fns'
 
 export default function Dashboard() {
   const [user, setUser] = useState(null)
   const [tipe, setTipe] = useState('pemasukan')
   const [jumlah, setJumlah] = useState('')
   const [catatan, setCatatan] = useState('')
-  const [tanggal, setTanggal] = useState('')
+  const [tanggal, setTanggal] = useState(new Date())
   const [data, setData] = useState([])
   const [grafik, setGrafik] = useState([
     { name: 'Pemasukan', value: 0 },
@@ -35,7 +38,7 @@ export default function Dashboard() {
       .from('transactions')
       .select('*')
       .eq('user_id', userId)
-      .order('tanggal', { ascending: true }) // urutkan naik
+      .order('tanggal', { ascending: true })
 
     if (!error) {
       setData(data)
@@ -67,13 +70,13 @@ export default function Dashboard() {
       tipe,
       jumlah: parseFloat(jumlah),
       catatan,
-      tanggal
+      tanggal: format(tanggal, 'yyyy-MM-dd')
     }])
 
     if (!error) {
       setJumlah('')
       setCatatan('')
-      setTanggal('')
+      setTanggal(new Date())
       fetchData(user.id)
     } else {
       alert('❌ Gagal menyimpan: ' + error.message)
@@ -97,23 +100,17 @@ export default function Dashboard() {
     window.location.href = '/'
   }
 
-  // Hitung saldo per baris untuk ditampilkan di tabel
   const getSaldoSementara = (index) => {
-    let saldo = 0
+    let sisa = 0
     for (let i = 0; i <= index; i++) {
       const item = data[i]
-      if (item.tipe === 'pemasukan') {
-        saldo += Number(item.jumlah)
-      } else {
-        saldo -= Number(item.jumlah)
-      }
+      sisa += item.tipe === 'pemasukan' ? Number(item.jumlah) : -Number(item.jumlah)
     }
-    return saldo
+    return sisa
   }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Logout */}
       <div className="flex justify-end mb-4">
         <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-1 rounded text-sm">
           Logout
@@ -129,8 +126,8 @@ export default function Dashboard() {
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie data={grafik} dataKey="value" nameKey="name" outerRadius={80} label>
-                <Cell fill="#10B981" /> {/* Pemasukan */}
-                <Cell fill="#EF4444" /> {/* Pengeluaran */}
+                <Cell fill="#10B981" />
+                <Cell fill="#EF4444" />
               </Pie>
               <Legend />
             </PieChart>
@@ -139,13 +136,15 @@ export default function Dashboard() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="grid sm:grid-cols-2 gap-4 mb-6">
-          <input
-            type="date"
-            value={tanggal}
-            onChange={(e) => setTanggal(e.target.value)}
-            className="border px-3 py-2 rounded"
-            required
-          />
+          <div>
+            <DatePicker
+              selected={tanggal}
+              onChange={(date) => setTanggal(date)}
+              dateFormat="yyyy-MM-dd"
+              className="border px-3 py-2 rounded w-full"
+              placeholderText="Pilih tanggal transaksi"
+            />
+          </div>
           <select value={tipe} onChange={(e) => setTipe(e.target.value)} className="border px-3 py-2 rounded">
             <option value="pemasukan">💰 Pemasukan</option>
             <option value="pengeluaran">💸 Pengeluaran</option>
