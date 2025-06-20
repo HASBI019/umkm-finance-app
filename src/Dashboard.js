@@ -123,7 +123,7 @@ export default function Dashboard() {
       </div>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }} className="max-w-4xl mx-auto bg-white shadow p-6 rounded-lg">
-        <img src="/logo-umkm.png" alt="Logo UMKM" className="h-40 w-auto mx-auto mb-4" />
+        <img src="/logo-umkm.png" alt="Logo UMKM" className="h-100 w-auto mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-purple-600 mb-2 text-center">📊 Dashboard Keuangan UMKM</h1>
 
         <div className="mb-4">
