@@ -328,7 +328,7 @@ export default function Dashboard() {
         <div className="text-center mt-8">
           <motion.p initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ duration: 0.5 }} className="text-lg font-semibold text-purple-700">✨ Buat UMKM, Semangat Terus! ✨</motion.p>
           <p className="text-sm text-gray-600 mt-1">Kami Mahasiswa STTC - Prodi Informatika | MK Sistem Informasi | Kelompok 2 Siap Membantu UMKM</p>
-          <p className="text-sm text-gray-700 font-semibold mt-1">MY TEAM : THREE START⭐⭐⭐</p>
+          <p className="text-sm text-gray-700 font-semibold mt-1">MY TEAM : THREE STAR⭐⭐⭐</p>
           <div className="flex justify-center gap-4 mt-4">
             <div className="text-center">
               <img src="/team1.jpg" alt="Tim 1" className="w-20 h-20 rounded-full object-cover border" />
